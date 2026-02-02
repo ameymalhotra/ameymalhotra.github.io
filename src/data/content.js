@@ -55,16 +55,28 @@ and am always learning new technologies to solve real-world problems.`,
 
   experience: [
     {
-      role: 'Software Engineering Intern',
-      company: 'Tech Company',
-      period: 'Summer 2024',
-      description: 'Developed features for production applications',
+      role: 'Undergraduate Research Assistant',
+      company: 'Data Science and Computational Biology Lab',
+      period: 'Sep 2025 - Present',
+      description: 'Engineering ML pipelines for cancer pathology image classification using transformer architectures',
     },
     {
-      role: 'Research Assistant',
-      company: 'University Lab',
-      period: '2023 - Present',
-      description: 'Working on machine learning research projects',
+      role: 'Undergraduate Research Assistant',
+      company: 'SCALE-R Lab, Department of Geography',
+      period: 'Sep 2025 - Present',
+      description: 'Building interactive web dashboards for coastal resilience visualization using React and MapBox',
+    },
+    {
+      role: 'Project Lead',
+      company: 'Unlock AI',
+      period: 'May 2025 - Present',
+      description: 'Leading development of a privacy-focused academic advising system using small language models',
+    },
+    {
+      role: 'Teaching Assistant',
+      company: 'Department of Computer Science',
+      period: 'Aug - Dec 2025',
+      description: 'Delivered Python programming support to 65+ students, improving comprehension scores by 20%',
     },
   ],
 
@@ -73,9 +85,11 @@ exploring new technologies. Working on personal projects and
 contributing to open source.`,
 
   contact: {
-    email: 'your.email@example.com',
-    github: 'https://github.com/yourusername',
-    linkedin: 'https://linkedin.com/in/yourusername',
+    email: 'axm8832@miami.edu',
+    github: 'https://github.com/tech-greek',
+    linkedin: 'https://www.linkedin.com/in/amey-malhotra/',
+    formEndpoint: null, // e.g. 'https://formspree.io/f/YOUR_FORM_ID' or null to hide form
+    tagline: "Let's get in touch and build together.",
   },
 
   resume: {

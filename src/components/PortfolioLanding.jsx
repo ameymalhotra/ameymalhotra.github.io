@@ -216,7 +216,7 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
       {/* Center content */}
       <div className="relative z-10 flex items-center justify-center h-full pointer-events-none">
         <div className="text-center">
-          <h1 className={`text-[3.375rem] md:text-[5.4rem] font-semibold mb-4 tracking-tight ${textColor}`}>
+          <h1 className={`text-[2.5rem] sm:text-[3.375rem] md:text-[5.4rem] font-semibold mb-4 tracking-tight ${textColor}`}>
             {leadText.split('').map((char, index) => (
               <span
                 key={`lead-${char}-${index}`}

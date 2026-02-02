@@ -10,37 +10,37 @@ function getProject(index) {
 
 const POSITIONS = {
   farLeft: {
-    transform: 'translateX(-250%) translateZ(-120px) rotateY(25deg)',
+    transform: 'translate(-50%, -50%) translateX(-250%) translateZ(-200px) rotateY(35deg)',
     zIndex: 0,
     opacity: 0,
   },
   offLeft: {
-    transform: 'translateX(-200%) translateZ(-120px) rotateY(25deg)',
+    transform: 'translate(-50%, -50%) translateX(-200%) translateZ(-100px) rotateY(30deg)',
     zIndex: 1,
     opacity: 0,
   },
   left: {
-    transform: 'translateX(-130%) translateZ(-80px) rotateY(18deg)',
+    transform: 'translate(-50%, -50%) translateX(-120%) translateZ(40px) rotateY(25deg)',
     zIndex: 2,
-    opacity: 0.85,
+    opacity: 0.9,
   },
   center: {
-    transform: 'translateX(0) translateZ(0) rotateY(0deg)',
-    zIndex: 3,
+    transform: 'translate(-50%, -50%) translateX(0) translateZ(-60px) rotateY(0deg)',
+    zIndex: 1,
     opacity: 1,
   },
   right: {
-    transform: 'translateX(130%) translateZ(-80px) rotateY(-18deg)',
+    transform: 'translate(-50%, -50%) translateX(120%) translateZ(40px) rotateY(-25deg)',
     zIndex: 2,
-    opacity: 0.85,
+    opacity: 0.9,
   },
   offRight: {
-    transform: 'translateX(200%) translateZ(-120px) rotateY(-25deg)',
+    transform: 'translate(-50%, -50%) translateX(200%) translateZ(-100px) rotateY(-30deg)',
     zIndex: 1,
     opacity: 0,
   },
   farRight: {
-    transform: 'translateX(250%) translateZ(-120px) rotateY(-25deg)',
+    transform: 'translate(-50%, -50%) translateX(250%) translateZ(-200px) rotateY(-35deg)',
     zIndex: 0,
     opacity: 0,
   },
@@ -61,8 +61,10 @@ export default function ProjectsSection({ theme }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [noTransition, setNoTransition] = useState(false)
   const timeoutRef = useRef(null)
+  const sectionRef = useRef(null)
+  const wheelAccumRef = useRef(0)
+  const isTransitioningRef = useRef(false)
 
-  const pageBg = theme === 'dark' ? 'bg-black' : 'bg-white'
   const textColor = theme === 'dark' ? 'text-white' : 'text-black'
   const subTextColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
   const cardBg = theme === 'dark' ? 'bg-white/[0.06]' : 'bg-gray-50'
@@ -70,6 +72,11 @@ export default function ProjectsSection({ theme }) {
   const pillBg = theme === 'dark' ? 'bg-white/10' : 'bg-black/5'
   const pillText = theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
   const accentColor = theme === 'dark' ? 'text-cyan-400' : 'text-blue-600'
+
+  // Spotlight colors
+  const spotlightGradient = theme === 'dark'
+    ? 'radial-gradient(ellipse 60% 40% at 50% 100%, rgba(6, 182, 212, 0.15) 0%, rgba(99, 102, 241, 0.08) 40%, transparent 70%)'
+    : 'radial-gradient(ellipse 60% 40% at 50% 100%, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.06) 40%, transparent 70%)'
 
   const goNext = useCallback(() => {
     if (isTransitioning) return
@@ -113,6 +120,42 @@ export default function ProjectsSection({ theme }) {
     }
   }, [])
 
+  useEffect(() => {
+    isTransitioningRef.current = isTransitioning
+  }, [isTransitioning])
+
+  // Horizontal trackpad / wheel scroll over cards: swipe left = next, swipe right = prev
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const WHEEL_THRESHOLD = 60
+    const handleWheel = (e) => {
+      const dx = e.deltaX
+      // Only handle horizontal scroll; ignore vertical so page can still scroll
+      if (Math.abs(dx) < 1) return
+      // Prevent browser back/forward gesture when user is swiping horizontally over projects
+      e.preventDefault()
+      if (isTransitioningRef.current) {
+        wheelAccumRef.current = 0
+        return
+      }
+      // Reset accumulation when scroll direction changes
+      if (dx > 0 && wheelAccumRef.current < 0) wheelAccumRef.current = 0
+      if (dx < 0 && wheelAccumRef.current > 0) wheelAccumRef.current = 0
+      wheelAccumRef.current += dx
+      // Swipe left (negative deltaX) = prev; swipe right (positive deltaX) = next
+      if (wheelAccumRef.current <= -WHEEL_THRESHOLD) {
+        wheelAccumRef.current += WHEEL_THRESHOLD
+        goPrev()
+      } else if (wheelAccumRef.current >= WHEEL_THRESHOLD) {
+        wheelAccumRef.current -= WHEEL_THRESHOLD
+        goNext()
+      }
+    }
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [goNext, goPrev])
+
   const slotContents = [
     getProject(activeIndex - 2),
     getProject(activeIndex - 1),
@@ -122,8 +165,8 @@ export default function ProjectsSection({ theme }) {
   ]
 
   return (
-    <section id="projects" className={`relative ${pageBg} py-28 md:py-44`}>
-      <div className="mx-auto max-w-6xl px-6">
+    <section ref={sectionRef} id="projects" className="relative py-28 md:py-44">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2
           className={`text-center text-3xl font-semibold tracking-tight md:text-5xl mb-16 ${textColor}`}
         >
@@ -131,13 +174,20 @@ export default function ProjectsSection({ theme }) {
         </h2>
 
         <div
-          className="relative flex justify-center items-center overflow-visible"
+          className="relative flex justify-center items-center overflow-visible h-[320px] sm:h-[380px] md:h-[420px]"
           style={{
             perspective: '1200px',
             perspectiveOrigin: 'center center',
-            height: '420px',
           }}
         >
+          {/* Spotlight glow beneath center card */}
+          <div
+            className="absolute pointer-events-none w-[90vw] max-w-[500px] h-[200px] sm:h-[250px] md:h-[300px] bottom-[-10px] left-1/2 -translate-x-1/2 blur-[20px] z-0"
+            style={{
+              background: spotlightGradient,
+            }}
+          />
+
           {slotContents.map((project, slotIndex) => {
             const posKey = slotPositions[slotIndex]
             const pos = POSITIONS[posKey]
@@ -161,6 +211,8 @@ export default function ProjectsSection({ theme }) {
                 }}
                 className={`absolute w-[320px] md:w-[380px] rounded-2xl border ${cardBorder} ${cardBg} p-6 md:p-8 shadow-xl ${isSide ? 'cursor-pointer select-none' : ''}`}
                 style={{
+                  left: '50%',
+                  top: '50%',
                   transform: pos.transform,
                   zIndex: pos.zIndex,
                   opacity: pos.opacity,
@@ -254,9 +306,6 @@ export default function ProjectsSection({ theme }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className={`text-sm ${subTextColor}`}>
-            {activeIndex + 1} / {n}
-          </span>
           <button
             type="button"
             onClick={goNext}

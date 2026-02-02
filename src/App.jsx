@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
+import { content } from './data/content.js'
 import PortfolioLanding from './components/PortfolioLanding.jsx'
 import AboutSection from './components/AboutSection.jsx'
 import ProjectsSection from './components/ProjectsSection.jsx'
-import WorkSection from './components/WorkSection.jsx'
+import ExperienceSection from './components/ExperienceSection.jsx'
+import ContactSection from './components/ContactSection.jsx'
 import Terminal from './components/Terminal.jsx'
 
 function smoothScrollTo(targetY, duration = 1400) {
@@ -32,19 +34,15 @@ function smoothScrollTo(targetY, duration = 1400) {
  * Main App Component
  * Portfolio landing with particle bracket effect.
  */
+const theme = 'dark'
+
 export default function App() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'light'
-    const storedTheme = window.localStorage?.getItem('theme')
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      return storedTheme
-    }
-    if (!window.matchMedia) return 'light'
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light'
-  })
   const [showTerminal, setShowTerminal] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    document.documentElement.classList.add('dark')
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -63,38 +61,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const storedTheme = window.localStorage?.getItem('theme')
-    if (storedTheme === 'light' || storedTheme === 'dark') return
-    if (!window.matchMedia) return
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (event) => {
-      setTheme(event.matches ? 'dark' : 'light')
-    }
-    if (media.addEventListener) {
-      media.addEventListener('change', handleChange)
-      return () => media.removeEventListener('change', handleChange)
-    }
-    media.addListener(handleChange)
-    return () => media.removeListener(handleChange)
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-    window.localStorage?.setItem('theme', theme)
-  }, [theme])
-
-  const handleToggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'))
-  }
-
   const handleNavClick = useCallback((e) => {
     const href = e.currentTarget.getAttribute('href')
     if (href && href.startsWith('#')) {
@@ -107,55 +73,46 @@ export default function App() {
     }
   }, [])
 
-  const pageBackground = theme === 'dark' ? 'bg-black' : 'bg-white'
-  const navText = theme === 'dark' ? 'text-white/90' : 'text-black/90'
-  const navBorder = theme === 'dark' ? 'border-white/10' : 'border-black/10'
-  const navBg = theme === 'dark' ? 'bg-black/50' : 'bg-white/70'
-  const navHover = theme === 'dark' ? 'hover:text-white' : 'hover:text-black'
-  const toggleStyles =
-    theme === 'dark'
-      ? 'bg-white/10 text-white hover:bg-white/20'
-      : 'bg-black/5 text-black hover:bg-black/10'
-
   return (
-    <div className={`min-h-screen w-full flex flex-col relative ${pageBackground}`}>
-      <nav
-        className={`fixed top-6 left-1/2 z-20 w-[min(680px,90vw)] -translate-x-1/2 rounded-full border ${navBorder} ${navBg} ${navText} backdrop-blur-md`}
-      >
-        <div className="flex items-center justify-between px-6 py-3 text-sm">
-          <div className="flex items-center gap-6">
-            <a href="#about" onClick={handleNavClick} className={`transition-colors ${navHover}`}>
-              About
-            </a>
-            <a href="#projects" onClick={handleNavClick} className={`transition-colors ${navHover}`}>
-              Projects
-            </a>
-            <a href="#experience" onClick={handleNavClick} className={`transition-colors ${navHover}`}>
-              Experience
-            </a>
-            <a href="#contact" onClick={handleNavClick} className={`transition-colors ${navHover}`}>
-              Contact
-            </a>
-            <button
-              type="button"
-              onClick={handleToggleTheme}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${toggleStyles}`}
-            >
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </button>
-          </div>
+    <div className="min-h-screen w-full flex flex-col relative bg-black">
+      <nav className="fixed top-5 left-1/2 z-20 w-[min(640px,92vw)] -translate-x-1/2 rounded-full border border-white/15 bg-black/35 text-white/95 shadow-2xl shadow-black/40 ring-1 ring-white/5 backdrop-blur-2xl">
+        <div className="flex items-center justify-evenly w-full h-14 px-6 sm:px-10 gap-1">
+          <a href="#about" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            About
+          </a>
+          <a href="#projects" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            Projects
+          </a>
+          <a href="#experience" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            Experience
+          </a>
+          <a href="#contact" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            Contact
+          </a>
+          <a
+            href={content.resume?.url}
+            download={content.resume?.filename}
+            className="flex items-center justify-center gap-2 h-9 px-4 rounded-full border border-blue-400/60 text-blue-400 text-[14px] font-medium tracking-wide transition-all duration-200 hover:bg-blue-400/20 hover:border-blue-400/80 hover:text-white"
+          >
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Resume
+          </a>
         </div>
       </nav>
 
       <div id="top">
-        <PortfolioLanding theme={theme} onToggleTheme={handleToggleTheme} />
+        <PortfolioLanding theme={theme} />
       </div>
 
       <AboutSection theme={theme} />
 
       <ProjectsSection theme={theme} />
 
-      <WorkSection theme={theme} pageBackground={pageBackground} />
+      <ExperienceSection theme={theme} />
+
+      <ContactSection />
 
       {showTerminal && (
         <div className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm">

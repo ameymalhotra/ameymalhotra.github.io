@@ -29,12 +29,23 @@ function getElementProgress(el) {
   return Math.max(0, Math.min(1, (start - rect.top) / (start - end)))
 }
 
-const SLIDE_OFFSET = 80
+const SLIDE_OFFSET_DESKTOP = 80
+const SLIDE_OFFSET_MOBILE = 40
+const SM_BREAKPOINT = 640
 
 export default function AboutSection({ theme }) {
   const blockRefs = useRef([])
   const [blockProgress, setBlockProgress] = useState([0, 0, 0])
+  const [slideOffset, setSlideOffset] = useState(SLIDE_OFFSET_DESKTOP)
   const rafRef = useRef(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(min-width: ${SM_BREAKPOINT}px)`)
+    const update = () => setSlideOffset(mq.matches ? SLIDE_OFFSET_DESKTOP : SLIDE_OFFSET_MOBILE)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -64,7 +75,7 @@ export default function AboutSection({ theme }) {
       id="about"
       className={`relative z-10 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}
     >
-      <div className="mx-auto max-w-5xl px-6 py-28 md:py-44">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-28 md:py-44">
         <h2
           className={`text-center text-3xl font-semibold tracking-tight md:text-5xl ${textColor}`}
         >
@@ -76,8 +87,8 @@ export default function AboutSection({ theme }) {
             const p = blockProgress[index]
             const fromLeft = block.side === 'left'
             const translateX = fromLeft
-              ? -SLIDE_OFFSET * (1 - p)
-              : SLIDE_OFFSET * (1 - p)
+              ? -slideOffset * (1 - p)
+              : slideOffset * (1 - p)
             return (
               <div
                 key={block.title}
