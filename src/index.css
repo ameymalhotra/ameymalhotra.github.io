@@ -63,11 +63,18 @@
   .reveal-section .reveal-highlight {
     opacity: 0;
     transform: translateY(1rem);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
   }
 
   .reveal-section.in-view .reveal-highlight {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* Promote canvas to own layer for smoother Three.js animation */
+  .canvas-layer {
+    transform: translateZ(0);
+    will-change: transform;
   }
 
 }

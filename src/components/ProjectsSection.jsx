@@ -64,6 +64,7 @@ export default function ProjectsSection({ theme }) {
   const sectionRef = useRef(null)
   const wheelAccumRef = useRef(0)
   const isTransitioningRef = useRef(false)
+  const touchStartXRef = useRef(null)
 
   const textColor = theme === 'dark' ? 'text-white' : 'text-black'
   const subTextColor = theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
@@ -154,6 +155,34 @@ export default function ProjectsSection({ theme }) {
     }
     el.addEventListener('wheel', handleWheel, { passive: false })
     return () => el.removeEventListener('wheel', handleWheel)
+  }, [goNext, goPrev])
+
+  // Touch swipe on mobile: swipe left = next, swipe right = prev
+  const SWIPE_THRESHOLD = 50
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const handleTouchStart = (e) => {
+      touchStartXRef.current = e.touches[0].clientX
+    }
+    const handleTouchEnd = (e) => {
+      if (touchStartXRef.current == null) return
+      if (isTransitioningRef.current) {
+        touchStartXRef.current = null
+        return
+      }
+      const endX = e.changedTouches[0].clientX
+      const delta = endX - touchStartXRef.current
+      touchStartXRef.current = null
+      if (delta < -SWIPE_THRESHOLD) goNext()
+      else if (delta > SWIPE_THRESHOLD) goPrev()
+    }
+    el.addEventListener('touchstart', handleTouchStart, { passive: true })
+    el.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart)
+      el.removeEventListener('touchend', handleTouchEnd)
+    }
   }, [goNext, goPrev])
 
   const slotContents = [

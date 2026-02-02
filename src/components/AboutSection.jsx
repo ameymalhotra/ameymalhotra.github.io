@@ -23,7 +23,7 @@ function getElementProgress(el) {
   const rect = el.getBoundingClientRect()
   const h = window.innerHeight
   const start = h * 0.9
-  const end = h * 0.6
+  const end = h * 0.7
   if (rect.top >= start) return 0
   if (rect.top <= end) return 1
   return Math.max(0, Math.min(1, (start - rect.top) / (start - end)))

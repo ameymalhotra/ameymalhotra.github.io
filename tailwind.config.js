@@ -9,6 +9,9 @@ export default {
       fontFamily: {
         mono: ['JetBrains Mono', 'IBM Plex Mono', 'monospace'],
       },
+      screens: {
+        'xs': '480px',
+      },
     },
   },
   plugins: [],

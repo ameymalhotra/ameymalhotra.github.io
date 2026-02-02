@@ -83,10 +83,14 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
 
     let time = 0
     let animationId
+    let lastTime = performance.now()
 
     const animate = () => {
       animationId = requestAnimationFrame(animate)
-      time += 0.001617
+      const now = performance.now()
+      const deltaSec = Math.min((now - lastTime) / 1000, 0.1)
+      lastTime = now
+      time += 0.097 * deltaSec
 
       const pos = geometry.attributes.position.array
       const scale = 1 + Math.sin(time) * 0.01
@@ -105,7 +109,7 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
               const width = 280
               const height = 170
               const centerX = 0
-              const centerY = 25
+              const centerY = 0
               const x = Math.sin(angle) * width
               const y = Math.sin(angle) * Math.cos(angle) * height
               circleTargets[i3] = x + centerX
@@ -211,46 +215,50 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
   return (
     <div className={`relative w-full h-screen overflow-hidden ${backgroundClass}`}>
       {/* Three.js canvas container */}
-      <div ref={containerRef} className="absolute top-0 left-0 w-full h-full" />
+      <div ref={containerRef} className="canvas-layer absolute top-0 left-0 w-full h-full" />
 
-      {/* Center content */}
+      {/* Text division: centered on screen */}
       <div className="relative z-10 flex items-center justify-center h-full pointer-events-none">
-        <div className="text-center">
-          <h1 className={`text-[2.5rem] sm:text-[3.375rem] md:text-[5.4rem] font-semibold mb-4 tracking-tight ${textColor}`}>
-            {leadText.split('').map((char, index) => (
-              <span
-                key={`lead-${char}-${index}`}
-                className="letter-appear inline-block"
-                style={{ animationDelay: `${index * letterDelayStep}s` }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-            {trailingText.split('').map((char, index) => (
-              <span
-                key={`trail-${char}-${index}`}
-                className="letter-appear inline-block"
-                style={{ animationDelay: `${trailingStartDelay + index * letterDelayStep}s` }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </h1>
-
-          {/* Scroll indicator */}
-          <div className="mt-12 animate-bounce">
-            <svg
-              className={`w-6 h-6 mx-auto ${scrollColor}`}
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        <h1 className={`text-[2.5rem] sm:text-[3.375rem] md:text-[5.4rem] font-semibold tracking-tight text-center w-full ${textColor}`}>
+          {leadText.split('').map((char, index) => (
+            <span
+              key={`lead-${char}-${index}`}
+              className="letter-appear inline-block"
+              style={{ animationDelay: `${index * letterDelayStep}s` }}
             >
-              <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
+          {trailingText.split('').map((char, index) => (
+            <span
+              key={`trail-${char}-${index}`}
+              className="letter-appear inline-block"
+              style={{ animationDelay: `${trailingStartDelay + index * letterDelayStep}s` }}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
+        </h1>
+      </div>
+
+      {/* Arrow: below text, centered on vertical guideline */}
+      <div
+        className="absolute inset-x-0 z-10 flex justify-center pointer-events-none"
+        style={{ top: 'calc(50% + 5.5rem)' }}
+        aria-hidden="true"
+      >
+        <div className={`animate-bounce ${scrollColor}`}>
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
         </div>
       </div>
     </div>

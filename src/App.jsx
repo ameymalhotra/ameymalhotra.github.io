@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react'
 import { content } from './data/content.js'
-import PortfolioLanding from './components/PortfolioLanding.jsx'
 import AboutSection from './components/AboutSection.jsx'
+
+const PortfolioLanding = lazy(() => import('./components/PortfolioLanding.jsx'))
 import ProjectsSection from './components/ProjectsSection.jsx'
 import ExperienceSection from './components/ExperienceSection.jsx'
 import ContactSection from './components/ContactSection.jsx'
@@ -76,34 +77,38 @@ export default function App() {
   return (
     <div className="min-h-screen w-full flex flex-col relative bg-black">
       <nav className="fixed top-5 left-1/2 z-20 w-[min(640px,92vw)] -translate-x-1/2 rounded-full border border-white/15 bg-black/35 text-white/95 shadow-2xl shadow-black/40 ring-1 ring-white/5 backdrop-blur-2xl">
-        <div className="flex items-center justify-evenly w-full h-14 px-6 sm:px-10 gap-1">
-          <a href="#about" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+        <div className="flex items-center justify-evenly w-full h-12 sm:h-14 px-2 sm:px-6 md:px-10 gap-0 sm:gap-1">
+          <a href="#about" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
             About
           </a>
-          <a href="#projects" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+          <a href="#projects" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
             Projects
           </a>
-          <a href="#experience" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
-            Experience
+          <a href="#experience" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            Exp
+            <span className="hidden sm:inline">erience</span>
           </a>
-          <a href="#contact" onClick={handleNavClick} className="flex items-center justify-center h-full px-4 text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+          <a href="#contact" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
             Contact
           </a>
           <a
             href={content.resume?.url}
             download={content.resume?.filename}
-            className="flex items-center justify-center gap-2 h-9 px-4 rounded-full border border-blue-400/60 text-blue-400 text-[14px] font-medium tracking-wide transition-all duration-200 hover:bg-blue-400/20 hover:border-blue-400/80 hover:text-white"
+            className="flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-9 px-2 sm:px-4 rounded-full border border-blue-400/60 text-blue-400 text-[12px] sm:text-[14px] font-medium tracking-wide transition-all duration-200 hover:bg-blue-400/20 hover:border-blue-400/80 hover:text-white"
+            title="Download Resume"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Resume
+            <span className="hidden sm:inline">Resume</span>
           </a>
         </div>
       </nav>
 
-      <div id="top">
-        <PortfolioLanding theme={theme} />
+      <div id="top" className="min-h-screen">
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+          <PortfolioLanding theme={theme} />
+        </Suspense>
       </div>
 
       <AboutSection theme={theme} />
