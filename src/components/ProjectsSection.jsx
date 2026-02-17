@@ -324,7 +324,7 @@ export default function ProjectsSection({ theme }) {
           })}
         </div>
 
-        <div className="mt-8 flex justify-center items-center gap-4">
+        <div className="mt-20 md:mt-8 flex justify-center items-center gap-4">
           <button
             type="button"
             onClick={goPrev}

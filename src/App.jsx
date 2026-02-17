@@ -15,8 +15,8 @@ function smoothScrollTo(targetY, duration = 1400) {
   let startTime = null
   let rafId = null
 
-  // Smooth ease-out curve for a gentle deceleration
-  const ease = (t) => 1 - Math.pow(1 - t, 4)
+  // Ease-out: quick start, gentle deceleration at the end (no slow ramp-up)
+  const ease = (t) => 1 - Math.pow(1 - t, 3)
 
   const step = (timestamp) => {
     if (!startTime) startTime = timestamp
@@ -69,7 +69,7 @@ export default function App() {
       const target = document.querySelector(href)
       if (target) {
         const y = target.getBoundingClientRect().top + window.scrollY
-        smoothScrollTo(y, 1200)
+        smoothScrollTo(y, 1440)
       }
     }
   }, [])
