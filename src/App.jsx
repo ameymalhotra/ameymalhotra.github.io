@@ -6,6 +6,7 @@ const PortfolioLanding = lazy(() => import('./components/PortfolioLanding.jsx'))
 import ProjectsSection from './components/ProjectsSection.jsx'
 import ExperienceSection from './components/ExperienceSection.jsx'
 import ContactSection from './components/ContactSection.jsx'
+import CurrentlySection from './components/CurrentlySection.jsx'
 import Terminal from './components/Terminal.jsx'
 
 function smoothScrollTo(targetY, duration = 1400) {
@@ -81,6 +82,9 @@ export default function App() {
           <a href="#about" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
             About
           </a>
+          <a href="#currently" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
+            Now
+          </a>
           <a href="#projects" onClick={handleNavClick} className="flex items-center justify-center h-full px-2 sm:px-4 text-[13px] sm:text-[15px] font-medium tracking-wide transition-colors duration-200 hover:text-white">
             Projects
           </a>
@@ -112,6 +116,8 @@ export default function App() {
       </div>
 
       <AboutSection theme={theme} />
+
+      <CurrentlySection theme={theme} />
 
       <ProjectsSection theme={theme} />
 

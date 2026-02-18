@@ -91,6 +91,14 @@ and am always learning new technologies to solve real-world problems.`,
     },
   ],
 
+  currently: {
+    featuredProject: {
+      name: 'Sideflow',
+      description: 'SideFlow was built to solve a frustration I constantly faced while working with LLMs: I would be following a multi step solution, get stuck on one part, and asking for clarification would either clutter the thread or force me to open a new chat, breaking my flow. Copy-pasting into another tool was even worse. SideFlow runs as a lightweight overlay that captures the active chat and lets you ask contextual follow-up questions without leaving the page, making working with LLMs faster, smoother, and far less frustrating.',
+      link: 'https://github.com/ameymalhotra/SideFLow.git',
+    },
+  },
+
   now: `Currently focused on building full-stack applications and 
 exploring new technologies. Working on personal projects and 
 contributing to open source.`,

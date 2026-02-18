@@ -1,22 +1,32 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-const POINT_COUNT = 800
-const FIELD_WIDTH = 800
-const FIELD_HEIGHT = 500
-const FIELD_DEPTH = 400
+// Match landing (PortfolioLanding) particle setup for consistent look
+const POINT_COUNT = 1400
+const FIELD_WIDTH = 1200
+const FIELD_HEIGHT = 600
+const FIELD_DEPTH = 600
 
-const PUSH_RADIUS = 100
-const PUSH_STRENGTH = 0.5
-const MOUSE_SCENE_SCALE_X = FIELD_WIDTH / 2
-const MOUSE_SCENE_SCALE_Y = FIELD_HEIGHT / 2
-const CAMERA_FOLLOW_SCALE = 35
+const REPULSION_RADIUS = 120
+const REPULSION_STRENGTH = 0.6
+const MOUSE_SCENE_SCALE_X = 300
+const MOUSE_SCENE_SCALE_Y = 200
+const CAMERA_FOLLOW_X = 50
+const CAMERA_FOLLOW_Y = 30
+const LERP = 0.04851
+const VELOCITY_SCALE = 0.064575
+
+const DEFAULT_POINT_SIZE = 2.4
+const FLOW_DRIFT_X = 0.4
 
 /**
- * Standalone particle background (same floating-dots style as hero).
- * Sizes to its container. Dark background, cyan points. Cursor pushes dots and subtly moves camera.
+ * Standalone particle background matching landing section: same point count,
+ * field size, dot size/opacity, velocities, mouse repulsion, and camera parallax.
+ * Sizes to its container (Contact section or Currently strip).
+ * Use pointSize prop to scale dots when container is shorter (e.g. strip) so they match hero apparent size.
+ * Use flowLeftToRight to enable slow left-to-right drift with horizontal wrap (Currently section only).
  */
-export default function ParticleBackground({ className = '' }) {
+export default function ParticleBackground({ className = '', pointSize = DEFAULT_POINT_SIZE, flowLeftToRight = false }) {
   const containerRef = useRef(null)
   const mouseRef = useRef({ x: 0, y: 0 })
 
@@ -25,17 +35,17 @@ export default function ParticleBackground({ className = '' }) {
     if (!container) return
 
     const backgroundColor = 0x000000
-    const pointColor = 0x60a5fa // blue-400, matches hero dots
+    const pointColor = 0x60a5fa // blue-400, same as landing
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(backgroundColor)
-    scene.fog = new THREE.Fog(backgroundColor, 150, 700)
+    scene.fog = new THREE.Fog(backgroundColor, 200, 900)
 
     const camera = new THREE.PerspectiveCamera(60, 1, 1, 2000)
-    camera.position.set(0, 0, 420)
+    camera.position.set(0, 0, 550)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(window.devicePixelRatio)
 
     const handleMouseMove = (e) => {
       const rect = container.getBoundingClientRect()
@@ -64,17 +74,17 @@ export default function ParticleBackground({ className = '' }) {
       basePositions[i3] = x
       basePositions[i3 + 1] = y
       basePositions[i3 + 2] = z
-      velocities[i3] = (Math.random() - 0.5) * 0.06
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.06
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.06
+      velocities[i3] = (Math.random() - 0.5) * VELOCITY_SCALE
+      velocities[i3 + 1] = (Math.random() - 0.5) * VELOCITY_SCALE
+      velocities[i3 + 2] = (Math.random() - 0.5) * VELOCITY_SCALE
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
     const material = new THREE.PointsMaterial({
       color: pointColor,
-      size: 2.2,
-      opacity: 0.85,
+      size: pointSize,
+      opacity: 0.8,
       transparent: true,
       sizeAttenuation: true,
     })
@@ -84,6 +94,7 @@ export default function ParticleBackground({ className = '' }) {
 
     let animationId
     let time = 0
+    let lastTime = performance.now()
 
     container.appendChild(renderer.domElement)
 
@@ -99,28 +110,42 @@ export default function ParticleBackground({ className = '' }) {
 
     function animate() {
       animationId = requestAnimationFrame(animate)
-      time += 0.0015
+      const now = performance.now()
+      const deltaSec = Math.min((now - lastTime) / 1000, 0.1)
+      lastTime = now
+      time += 0.097 * deltaSec
 
       const pos = geometry.attributes.position.array
-      const scale = 1 + Math.sin(time) * 0.012
+      const scale = 1 + Math.sin(time) * 0.01
       const mouseX = mouseRef.current.x * MOUSE_SCENE_SCALE_X
       const mouseY = mouseRef.current.y * MOUSE_SCENE_SCALE_Y
 
       for (let i = 0; i < POINT_COUNT; i++) {
         const i3 = i * 3
-        basePositions[i3] += velocities[i3]
+        basePositions[i3] += velocities[i3] + (flowLeftToRight ? FLOW_DRIFT_X : 0)
         basePositions[i3 + 1] += velocities[i3 + 1]
         basePositions[i3 + 2] += velocities[i3 + 2]
 
-        if (basePositions[i3] < -FIELD_WIDTH / 2 || basePositions[i3] > FIELD_WIDTH / 2) velocities[i3] *= -1
+        if (flowLeftToRight) {
+          if (basePositions[i3] > FIELD_WIDTH / 2) {
+            basePositions[i3] = -FIELD_WIDTH / 2
+            pos[i3] = -FIELD_WIDTH / 2  // snap rendered pos too
+          }
+          if (basePositions[i3] < -FIELD_WIDTH / 2) {
+            basePositions[i3] = FIELD_WIDTH / 2
+            pos[i3] = FIELD_WIDTH / 2   // snap rendered pos too
+          }
+        } else {
+          if (basePositions[i3] < -FIELD_WIDTH / 2 || basePositions[i3] > FIELD_WIDTH / 2) velocities[i3] *= -1
+        }
         if (basePositions[i3 + 1] < -FIELD_HEIGHT / 2 || basePositions[i3 + 1] > FIELD_HEIGHT / 2) velocities[i3 + 1] *= -1
         if (basePositions[i3 + 2] < -FIELD_DEPTH / 2 || basePositions[i3 + 2] > FIELD_DEPTH / 2) velocities[i3 + 2] *= -1
 
         const dx = basePositions[i3] - mouseX
         const dy = basePositions[i3 + 1] - mouseY
         const dist = Math.hypot(dx, dy)
-        if (dist < PUSH_RADIUS && dist > 0) {
-          const push = (1 - dist / PUSH_RADIUS) * PUSH_STRENGTH
+        if (dist < REPULSION_RADIUS && dist > 0) {
+          const push = (1 - dist / REPULSION_RADIUS) * REPULSION_STRENGTH
           basePositions[i3] += (dx / dist) * push
           basePositions[i3 + 1] += (dy / dist) * push
         }
@@ -128,16 +153,16 @@ export default function ParticleBackground({ className = '' }) {
         const targetX = basePositions[i3] * scale
         const targetY = basePositions[i3 + 1] * scale
         const targetZ = basePositions[i3 + 2] * scale
-        pos[i3] += (targetX - pos[i3]) * 0.045
-        pos[i3 + 1] += (targetY - pos[i3 + 1]) * 0.045
-        pos[i3 + 2] += (targetZ - pos[i3 + 2]) * 0.045
+        pos[i3] += (targetX - pos[i3]) * LERP
+        pos[i3 + 1] += (targetY - pos[i3 + 1]) * LERP
+        pos[i3 + 2] += (targetZ - pos[i3 + 2]) * LERP
       }
       geometry.attributes.position.needsUpdate = true
 
-      const camTargetX = mouseRef.current.x * CAMERA_FOLLOW_SCALE
-      const camTargetY = mouseRef.current.y * CAMERA_FOLLOW_SCALE
-      camera.position.x += (camTargetX - camera.position.x) * 0.02
-      camera.position.y += (camTargetY - camera.position.y) * 0.02
+      const camTargetX = mouseRef.current.x * CAMERA_FOLLOW_X
+      const camTargetY = mouseRef.current.y * CAMERA_FOLLOW_Y
+      camera.position.x += (camTargetX - camera.position.x) * 0.024255
+      camera.position.y += (camTargetY - camera.position.y) * 0.024255
       camera.lookAt(0, 0, 0)
 
       renderer.render(scene, camera)
@@ -158,7 +183,7 @@ export default function ParticleBackground({ className = '' }) {
       material.dispose()
       renderer.dispose()
     }
-  }, [])
+  }, [pointSize, flowLeftToRight])
 
   return <div ref={containerRef} className={className} aria-hidden="true" />
 }
