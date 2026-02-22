@@ -112,8 +112,8 @@ contributing to open source.`,
   },
 
   resume: {
-    url: '/resume.pdf', // Place your resume.pdf in the public folder
-    filename: 'resume.pdf',
+    url: '/resume_AmeyMalhotra.pdf',
+    filename: 'resume_AmeyMalhotra.pdf',
   },
 }
 
