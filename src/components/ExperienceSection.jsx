@@ -20,21 +20,19 @@ export default function ExperienceSection({ theme }) {
   const rafRef = useRef(null)
 
   useEffect(() => {
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(() => {
-        setProgress(
-          itemRefs.current.map((el) => getElementProgress(el))
-        )
-        rafRef.current = null
-      })
+    const SMOOTH = 0.12 // lerp factor: smooth follow for mouse wheel (trackpad-like)
+    const smoothed = experience.map(() => 0)
+
+    const tick = () => {
+      rafRef.current = requestAnimationFrame(tick)
+      const target = itemRefs.current.map((el) => getElementProgress(el))
+      for (let i = 0; i < target.length; i++) {
+        smoothed[i] += (target[i] - smoothed[i]) * SMOOTH
+      }
+      setProgress([...smoothed])
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    rafRef.current = requestAnimationFrame(tick)
     return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])

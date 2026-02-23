@@ -9,7 +9,6 @@ const FIELD_DEPTH = 600
 export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
   const containerRef = useRef(null)
   const mouseRef = useRef(new THREE.Vector2(0, 0))
-  const scrollRef = useRef(0)
 
   useEffect(() => {
     const isDark = theme === 'dark'
@@ -74,16 +73,13 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
       mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1
     }
 
-    const handleScroll = () => {
-      scrollRef.current = window.scrollY || 0
-    }
-
     window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('scroll', handleScroll, { passive: true })
 
     let time = 0
     let animationId
     let lastTime = performance.now()
+    // Smoothed scroll for mouse wheel: lerp so animations don't jump with discrete wheel events
+    let smoothedScrollY = 0
 
     const animate = () => {
       animationId = requestAnimationFrame(animate)
@@ -172,7 +168,8 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
       camera.position.y += (targetY - camera.position.y) * 0.024255
       camera.lookAt(0, 0, 0)
 
-      const fadeProgress = Math.min(1, scrollRef.current / window.innerHeight)
+      smoothedScrollY += (window.scrollY - smoothedScrollY) * 0.1
+      const fadeProgress = Math.min(1, smoothedScrollY / window.innerHeight)
       material.opacity = 0.8 * (1 - fadeProgress)
 
       renderer.render(scene, camera)
@@ -191,7 +188,6 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
       if (animationId) cancelAnimationFrame(animationId)
       containerRef.current?.removeChild(renderer.domElement)

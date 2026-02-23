@@ -31,21 +31,23 @@ export default function ContactSection() {
   const rafRef = useRef(null)
 
   useEffect(() => {
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(() => {
-        setHeadingProgress(getElementProgress(headingRef.current))
-        setFormProgress(getElementProgress(formRef.current))
-        setLinksProgress(getElementProgress(linksRef.current))
-        rafRef.current = null
-      })
+    const SMOOTH = 0.12 // lerp factor: smooth follow for mouse wheel (trackpad-like)
+    const smoothed = { heading: 0, form: 0, links: 0 }
+
+    const tick = () => {
+      rafRef.current = requestAnimationFrame(tick)
+      const targetHeading = getElementProgress(headingRef.current)
+      const targetForm = getElementProgress(formRef.current)
+      const targetLinks = getElementProgress(linksRef.current)
+      smoothed.heading += (targetHeading - smoothed.heading) * SMOOTH
+      smoothed.form += (targetForm - smoothed.form) * SMOOTH
+      smoothed.links += (targetLinks - smoothed.links) * SMOOTH
+      setHeadingProgress(smoothed.heading)
+      setFormProgress(smoothed.form)
+      setLinksProgress(smoothed.links)
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    rafRef.current = requestAnimationFrame(tick)
     return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])

@@ -48,20 +48,19 @@ export default function AboutSection({ theme }) {
   }, [])
 
   useEffect(() => {
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(() => {
-        const progress = blockRefs.current.map((el) => getElementProgress(el))
-        setBlockProgress(progress)
-        rafRef.current = null
-      })
+    const SMOOTH = 0.12 // lerp factor: smooth follow for mouse wheel (trackpad-like)
+    const smoothed = [0, 0, 0]
+
+    const tick = () => {
+      rafRef.current = requestAnimationFrame(tick)
+      const target = blockRefs.current.map((el) => getElementProgress(el))
+      for (let i = 0; i < 3; i++) {
+        smoothed[i] += (target[i] - smoothed[i]) * SMOOTH
+      }
+      setBlockProgress([...smoothed])
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    rafRef.current = requestAnimationFrame(tick)
     return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])
