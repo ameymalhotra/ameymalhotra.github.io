@@ -60,7 +60,7 @@ and am always learning new technologies to solve real-world problems.`,
       tech: ['React', 'JavaScript', 'Mapbox', 'Python', 'GIS', 'Data Pipelines', 'Machine Learning'],
       impact: 'Actionable climate risk insights for public planning and research',
       link: 'https://github.com/ameymalhotra/scale-r',
-      liveUrl: 'https://scaler-app.vercel.app',
+      liveUrl: 'https://scale-r.miami.edu/about',
     },
   ],
 
