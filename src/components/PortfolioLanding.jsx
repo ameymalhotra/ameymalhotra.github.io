@@ -68,7 +68,13 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
     const points = new THREE.Points(geometry, material)
     scene.add(points)
 
+    // Track whether the cursor has actually moved over the page. The default
+    // mouse position is (0,0) — the screen center — which would otherwise make
+    // isNearText true on load and form the infinity before any interaction,
+    // causing it to "burst" the moment the user moves their cursor in.
+    let hasMouseMoved = false
     const handleMouseMove = (event) => {
+      hasMouseMoved = true
       mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1
       mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1
     }
@@ -81,6 +87,14 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
     // Smoothed scroll for mouse wheel: lerp so animations don't jump with discrete wheel events
     let smoothedScrollY = 0
 
+    // Intro: auto-form the infinity on load as a branding moment, hold it, then
+    // release to normal cursor-driven behavior. Releasing (not bursting) lets the
+    // existing field lerp dissolve it smoothly. INTRO_HOLD_MS is how long the
+    // shape stays formed before the page becomes interaction-driven.
+    const INTRO_HOLD_MS = 2600
+    const introStart = performance.now()
+    let introActive = true
+
     const animate = () => {
       animationId = requestAnimationFrame(animate)
       const now = performance.now()
@@ -91,10 +105,21 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
       const pos = geometry.attributes.position.array
       const scale = 1 + Math.sin(time) * 0.01
 
-      const isNearText =
-        Math.abs(mouseRef.current.x) < 0.4 && Math.abs(mouseRef.current.y) < 0.25
+      if (introActive && now - introStart > INTRO_HOLD_MS) {
+        introActive = false
+      }
 
-      if (isNearText) {
+      const isNearText =
+        hasMouseMoved &&
+        Math.abs(mouseRef.current.x) < 0.4 &&
+        Math.abs(mouseRef.current.y) < 0.25
+
+      // Show the infinity during the intro hold, then only when the cursor is
+      // near the centered text. When this flips false the points lerp back to
+      // the floating field — a smooth dissolve, never a burst.
+      const showInfinity = introActive || isNearText
+
+      if (showInfinity) {
         const circleCount = Math.floor(POINT_COUNT * 0.6)
         if (circleSet[0] === 0) {
           for (let i = 0; i < POINT_COUNT; i++) {
@@ -138,13 +163,18 @@ export default function PortfolioLanding({ theme = 'light', onToggleTheme }) {
           velocities[i3 + 2] *= -1
         }
 
-        const dx = basePositions[i3] - mouseX
-        const dy = basePositions[i3 + 1] - mouseY
-        const dist = Math.hypot(dx, dy)
-        if (dist < 120 && dist > 0) {
-          const push = (1 - dist / 120) * 0.6
-          basePositions[i3] += (dx / dist) * push
-          basePositions[i3 + 1] += (dy / dist) * push
+        // Skip cursor repulsion while the infinity shape is showing: the cursor
+        // sits at the shape's center, so repelling here would blast the free
+        // "mini blob" particles away from the infinity.
+        if (!showInfinity) {
+          const dx = basePositions[i3] - mouseX
+          const dy = basePositions[i3 + 1] - mouseY
+          const dist = Math.hypot(dx, dy)
+          if (dist < 120 && dist > 0) {
+            const push = (1 - dist / 120) * 0.6
+            basePositions[i3] += (dx / dist) * push
+            basePositions[i3 + 1] += (dy / dist) * push
+          }
         }
 
         if (circleSet[i] === 1) {

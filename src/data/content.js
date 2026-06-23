@@ -66,6 +66,12 @@ and am always learning new technologies to solve real-world problems.`,
 
   experience: [
     {
+      role: 'AI Engineering Intern',
+      company: 'KOLLECTIVE.MODA',
+      period: 'May 2026 - Present',
+      description: 'Designing and developing AI-powered content systems from the ground up, including multi-agent pipeline architecture, database design, and third-party API integrations. Working across full-stack TypeScript, PostgreSQL/Prisma, and cloud deployment on Railway and AWS.',
+    },
+    {
       role: 'Undergraduate Research Assistant',
       company: 'Data Science and Computational Biology Lab',
       period: 'Sep 2025 - Present',
@@ -80,7 +86,7 @@ and am always learning new technologies to solve real-world problems.`,
     {
       role: 'Project Lead',
       company: 'Unlock AI',
-      period: 'May 2025 - Present',
+      period: 'May 2025 - May 2026',
       description: 'Leading development of a privacy-focused academic advising system using small language models',
     },
     {
